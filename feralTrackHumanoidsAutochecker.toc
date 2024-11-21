@@ -1,0 +1,5 @@
+## Interface: 30403
+## Version: 1.0.0
+## Title: feral track humanoids autochecker
+
+feralTrackHumanoidsAutochecker.lua
