@@ -1,46 +1,47 @@
-local function enableHumanoidsTracking()
-  C_Minimap.SetTracking(1, true)
+FeralTrackHumanoidsAutochecker = {
+  C_Minimap = C_Minimap,
 
-  -- for i = 1, C_Minimap.GetNumTrackingTypes() do
-  --   local x, _, y = C_Minimap.GetTrackingInfo(i)
+  catFormId = 768,
 
-  --   if x == GetSpellInfo(19883) then
-  --     print('i:' .. i);
-  --     C_Minimap.SetTracking(i, true)
-  --   end
-  -- end
-end
+  enableHumanoidsTracking = function(self)
+    self.C_Minimap.SetTracking(1, true)
+  end,
 
-local function isDruid()
-  local _, class = UnitClass('player')
+  isDruid = function()
+    local _, class = UnitClass('player')
 
-  print('test', _, class)
+    return class == "DRUID"
+  end,
 
-  return class == "DRUID"
-end
-
-if isDruid() then
-  print('feral track humanoids autochecker started')
-  enableHumanoidsTracking();
-
-  local frame = CreateFrame("Frame");
-
-  frame:RegisterEvent("UNIT_AURA");
-  frame:SetScript("OnEvent", function()
-    local i = 1;
-
-    local buff = UnitBuff("player", i);
-    local catFormId = 768;
-
-    while buff do
-      if buff == GetSpellInfo(catFormId) then
-        enableHumanoidsTracking()
-        break
-      end
-
-      i = i + 1;
-
-      buff = UnitBuff("player", i);
+  run = function(self)
+    if not self:isDruid() then
+      return;
     end
-  end)
-end
+
+    print('feral track humanoids autochecker started')
+
+    self:enableHumanoidsTracking();
+
+    local frame = CreateFrame("Frame");
+
+    frame:RegisterEvent("UNIT_AURA");
+    frame:SetScript("OnEvent", function()
+      local i = 1;
+
+      local buff = C_UnitAuras.GetAuraDataByIndex("player", i);
+
+      while buff do
+        if buff.spellId == self.catFormId then
+          self:enableHumanoidsTracking()
+          break
+        end
+
+        i = i + 1;
+
+        buff = C_UnitAuras.GetAuraDataByIndex("player", i);
+      end
+    end)
+  end
+}
+
+FeralTrackHumanoidsAutochecker:run()
